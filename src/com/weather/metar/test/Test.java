@@ -68,8 +68,9 @@ public class Test {
 	}
 
 	public static void main(String[] args) {
+		//todoVRB02G17MPS
 		// TODO 含AUTO会有//缺测数据
-		String metar = "METAR ZWTL 270700Z VRB02MPS CAVOK 39/09 Q1001 NOSIG=\r\n" + "";
+		String metar = "METAR ZWTL 270700Z VRB02G17MPS CAVOK 39/09 Q1001 NOSIG=\r\n" + "";
 		metar = metar.toUpperCase();
 		String infos[] = metar.split("\\s+");
 		Metar m = new Metar();
@@ -102,7 +103,8 @@ public class Test {
 				if (infos[i].startsWith("VRB")) {
 					w.setVRB(true);
 
-				} else if (infos[i].contains("G")) {
+				} 
+				if (infos[i].contains("G")) {
 					w.setGustwind(true);
 					w.setMax_gustwind_speed(parseString(infos[i].substring(6, 8)));
 				}
@@ -127,7 +129,7 @@ public class Test {
 				System.out.println(w);
 				continue;
 			}
-			// TODO 能见度 四个数字 [带方向]国内暂时按4个数字处理
+			// TODO 能见度 四个数字 [带方向]国内暂时按4个数字处理 
 			if (isFourNumber(infos[i])) {
 				m.setVisibility(parseString(infos[i]));
 				System.out.println("能见度" + parseString(infos[i]) + "米");
@@ -240,14 +242,17 @@ public class Test {
 						+ (infos[i].split("/")[1].contains("M") ? parseString(infos[i].split("/")[1].replace("M", "-"))
 								: parseString(infos[i].split("/")[1]) + "℃,"));
 			}
-			// 气压
+			// TODO 北美A英寸汞柱
 			if (infos[i].startsWith("Q")) {
 				m.setPressure(parseString(infos[i].substring(1)));
 				System.out.println("修正海平面气压" + parseString(infos[i].substring(1)) + "百帕");
 				flag = true;
 			}
-			// TODO 气压后面的 趋势预报暂时都break
+			// TODO 趋势预测 气压后面的 趋势预报暂时都break
 			if (flag) {
+				//NOSIG 无明显变化
+				//TEMPO  temperorary短时
+				//BECMG becoming 逐渐转变
 				break;
 			}
 			// TODO WS风切变

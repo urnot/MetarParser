@@ -7,8 +7,8 @@ package com.weather.metar.weatherenum;
  */
 public enum Phenomena {
 	VC("VC","附近"),
-	MI("MI", "浅的"), BC("BC", "散片状"), DR("DR", "低吹的"), BL("BL", "高吹的"), SH("SH", "阵"), TS("TS", "雷暴的"), FZ("FZ",
-			"冻"), PR("PR", "部分范围的"),
+	MI("MI", "浅"), BC("BC", "散片状"), DR("DR", "低吹"), BL("BL", "高吹"), SH("SH", "阵"), TS("TS", "雷"), FZ("FZ",
+			"冻"), PR("PR", "部分范围"),
 
 	DZ("DZ", "毛毛雨"), RA("RA", "雨"), SN("SN", "雪"), SG("SG", "米雪"), IC("IC", "冰针"), PE("PE", "冰粒"), GR("GR",
 			"冰雹"), GS("GS", "小冰雹"),

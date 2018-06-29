@@ -7,17 +7,24 @@ import com.weather.metar.compoment.RunawayVisualRange;
 import com.weather.metar.compoment.WeatherPhenomena;
 import com.weather.metar.compoment.Wind;
 
+/**
+ * 机场天气报告->METAR报 SPECI报  for CHINA 
+ * @author jlshen
+ *
+ */
 public class Metar {
-	// 预报类型 METAR or SPECI
+	// 预报类型 METAR实况 or SPECI特选报
 	private String report_type;
-	// 机场代码
+	// 机场四字代码
 	private String airport_code;
-	// 预报时间 世界时
+	// 预报时间 世界时 200300Z->20日03时00分Z
 	private String report_time;
 	// 风
 	private Wind wind;
 	// 能见度
 	private int visibility;
+	// VV垂直能见度
+	private int vertical_visibility;
 	// 跑道视程
 	private List<RunawayVisualRange> rvr;
 	// 天气现象 可能多组
