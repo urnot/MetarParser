@@ -54,7 +54,7 @@ public class WeatherPhenomena {
 		}
 		// TODO Auto-generated method stub
 		return itensity_result + Phenomena.getDescriptionByCode(this.adjective)
-				+ Phenomena.getDescriptionByCode(this.phenomena) + ",";
+				+ Phenomena.getDescriptionByCode(this.phenomena) ;
 	}
 
 }

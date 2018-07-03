@@ -4,6 +4,7 @@ import com.weather.metar.weatherenum.Unit;
 
 /**
  * 风
+ * 
  * @author jlshen
  *
  */
@@ -106,21 +107,26 @@ public class Wind {
 	@Override
 	public String toString() {
 		String wind_range = "";
-		if (this.containsV) {
-			wind_range = "风向范围" + this.min_gustwind_direction + "-" + this.max_gustwind_direction;
+		String result = "";
+		if (this.isVRB) {
+			result += "可变风";
 		}
+
+		if (this.containsV) {
+			result += "风向范围" + this.min_gustwind_direction + "°-" + this.max_gustwind_direction + "°,";
+		}
+
+		if (this.wind_speed == 0) {
+			result += "静风";
+		}
+		result += "风速" + +this.wind_speed + Unit.getDescriptionByCode(this.wind_unit) + ",风向" + this.wind_direction
+				+ "°" + (wind_range.length() > 6 ? ("," + wind_range) : "");
 		if (this.isGustwind) {
 			// TODO 阵风
-			return "阵风风速" + this.wind_speed + Unit.getDescriptionByCode(this.wind_unit)
-					+ (wind_range.length() > 5 ? wind_range : "") + "度,";
-		} else if (this.isVRB) {
-			return "可变风" + this.wind_speed + Unit.getDescriptionByCode(this.wind_unit) + ",";
-		} else if (this.wind_speed == 0) {
-			return "静风,";
-		} else {
-			return "风速" + this.wind_speed + Unit.getDescriptionByCode(this.wind_unit) + ",风向" + this.wind_direction
-					+ "度," + (wind_range.length() > 6 ? wind_range : "");
+			result += "阵风达" + this.max_gustwind_speed + Unit.getDescriptionByCode(this.wind_unit);
 		}
+
+		return result;
 	}
 
 }

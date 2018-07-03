@@ -1,9 +1,11 @@
 package com.weather.metar.compoment;
 
 import com.weather.metar.weatherenum.CloudAmount;
+import com.weather.metar.weatherenum.Phenomena;
 
 /**
  * 云
+ * 
  * @author jlshen
  *
  */
@@ -16,11 +18,11 @@ public class Cloud {
 	private boolean isCB;
 	// 是否TCU浓积云
 	private boolean isTCU;
-	//是否是CAVOK 天气及能见度良好
+	// 是否是CAVOK 天气及能见度良好
 	private boolean isCAVOK;
-	//没有对飞行有重要影响的云
+	// 没有对飞行有重要影响的云
 	private boolean isNSC;
-	//天空无云
+	// 天空无云
 	private boolean isSKC;
 
 	public String getCloud_amount() {
@@ -54,7 +56,7 @@ public class Cloud {
 	public void setTCU(boolean isTCU) {
 		this.isTCU = isTCU;
 	}
-	
+
 	public boolean isCAVOK() {
 		return isCAVOK;
 	}
@@ -81,15 +83,17 @@ public class Cloud {
 
 	@Override
 	public String toString() {
-		
-		if (this.isCB) {
-			return this.cloud_height + "英尺有" + CloudAmount.getDescriptionByCloud(this.cloud_amount) +CloudAmount.getDescriptionByCloud("CB") + ",";
-		} else if (this.isTCU) {
-			return this.cloud_height + "英尺有" + CloudAmount.getDescriptionByCloud(this.cloud_amount) + CloudAmount.getDescriptionByCloud("TCU") + ",";
-		} else if(this.isCAVOK||this.isNSC||this.isSKC) {
-			return CloudAmount.getDescriptionByCloud(this.cloud_amount);
-		}else{
-			return this.cloud_height + "英尺有" + CloudAmount.getDescriptionByCloud(this.cloud_amount) + ",";
+		String result = "";
+		if (this.isCAVOK || this.isNSC || this.isSKC) {
+			result += CloudAmount.getDescriptionByCloud(this.cloud_amount);
 		}
+		result += CloudAmount.getDescriptionByCloud(this.cloud_amount) + ",云底高" + (int) (this.cloud_height * 0.3) + "m";
+		if (this.isCB) {
+			result += CloudAmount.getDescriptionByCloud(CloudAmount.CB.name());
+		}
+		if (this.isTCU) {
+			result += CloudAmount.getDescriptionByCloud(CloudAmount.TCU.name());
+		}
+		return result;
 	}
 }

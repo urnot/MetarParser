@@ -1,4 +1,4 @@
-package com.weather.metar.parse;
+package com.weather.metar.util;
 
 import java.util.regex.Pattern;
 
@@ -53,7 +53,7 @@ public class Regex {
 	 * @return
 	 */
 	public static boolean isTimeZ(String str) {
-		Pattern pattern = Pattern.compile("[0-9]{6}Z");
+		Pattern pattern = Pattern.compile("[0-3][0-9]{5}Z");
 		return pattern.matcher(str).matches();
 	}
 	/**
@@ -96,6 +96,26 @@ public class Regex {
 	 */
 	public static boolean isValidTime(String str) {
 		Pattern pattern = Pattern.compile("[0-9]{6}");
+		return pattern.matcher(str).matches();
+	}
+	/**
+	 * 是否积冰
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static boolean isFrozen(String str) {
+		Pattern pattern = Pattern.compile("6[0-9]{5}");
+		return pattern.matcher(str).matches();
+	}
+	/**
+	 * 是否颠簸
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static boolean isTurbulence(String str) {
+		Pattern pattern = Pattern.compile("5[0-9]{5}");
 		return pattern.matcher(str).matches();
 	}
 }

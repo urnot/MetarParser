@@ -37,7 +37,12 @@ public class Metar {
 	private int dewpoint_temperature;
 	// 修正海平面气压
 	private int pressure;
+	//风切变
+	private String wind_shear;
+	
 	private String forecast;
+	
+	private String txtDecode;
 
 	public String getReport_type() {
 		return report_type;
@@ -127,6 +132,22 @@ public class Metar {
 		this.pressure = pressure;
 	}
 
+	public int getVertical_visibility() {
+		return vertical_visibility;
+	}
+
+	public void setVertical_visibility(int vertical_visibility) {
+		this.vertical_visibility = vertical_visibility;
+	}
+
+	public String getWind_shear() {
+		return wind_shear;
+	}
+
+	public void setWind_shear(String wind_shear) {
+		this.wind_shear = wind_shear;
+	}
+
 	public String getForecast() {
 		return forecast;
 	}
@@ -134,5 +155,15 @@ public class Metar {
 	public void setForecast(String forecast) {
 		this.forecast = forecast;
 	}
+
+	public String getTxtDecode() {
+		return txtDecode;
+	}
+
+	public void setTxtDecode(String txtDecode) {
+		this.txtDecode = txtDecode;
+	}
+
+	
 
 }

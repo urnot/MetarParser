@@ -1,7 +1,10 @@
-package com.weather.metar.test;
+package com.weather.metar.core;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.weather.metar.compoment.Cloud;
 import com.weather.metar.compoment.RunawayVisualRange;
@@ -9,45 +12,67 @@ import com.weather.metar.compoment.WeatherPhenomena;
 import com.weather.metar.compoment.Wind;
 import com.weather.metar.domain.Metar;
 import com.weather.metar.exception.MetarParseException;
-import com.weather.metar.parse.Regex;
+import com.weather.metar.util.Regex;
+import com.weather.metar.util.TimeParser;
+import com.weather.metar.weatherenum.Phenomena;
 
-public class MyMetarParser {
+public class MetarDecode {
 
 	public Metar parseMetar(String report) throws MetarParseException {
 		Metar m = new Metar();
+		String result = "";
+		int pos = 0;// 记录游标，天气现象变化之后的四位数字 非能见度
 		if (report == null || report.length() <= 0) {
 			throw new MetarParseException("null input");
 		} else {
 			report = report.toUpperCase().trim();
-			String infos[] = report.split("\\s+");
+			if (report.contains("TKOF")) {
+				m.setWind_shear("起飞跑道有风切变");
+			} else if (report.contains("LDG")) {
+				m.setWind_shear("着陆跑道有风切变");
+			} else if (report.contains("ALL")) {
+				m.setWind_shear("所有跑道的起飞或将近航道有风切变");
+			}
+			String infos[] = report.toUpperCase().trim().replace("=", "").split("\\s+");
 			List<Cloud> cloud_group = new ArrayList<>();
 			Wind w = new Wind();
 			List<WeatherPhenomena> phenomenas = new ArrayList<>();
-			boolean flag = false;
 
 			for (int i = 0; i < infos.length; i++) {
-
+				/*
+				 * 第一组 电报名称
+				 */
 				// 例行天气预报实况，特殊天气报告
 				if (Regex.isMETAR(infos[i])) {
-					System.out.println("格式：" + infos[i]);
+//					System.out.println("格式：" + infos[i]);
 					m.setReport_time(infos[i]);
+					result +="类型：" +infos[i] + "\r\n";
 					continue;
 				}
+				/*
+				 * 第2组 地名代码组
+				 */
 				// CHINA only
 				if (Regex.isChinaICAO(infos[i])) {
 					m.setAirport_code(infos[i]);
-					System.out.println("机场代码:" + infos[i] + ",");
+//					System.out.println("机场:" + infos[i] + ",");
+					result += "机场:" + infos[i] + "\r\n";
 					continue;
 
 				}
-				//TODO 时间格式
+				/*
+				 * 第3组 预报时间组 UTC
+				 */
 				if (Regex.isTimeZ(infos[i]) && infos[i].length() == 7) {
-					m.setReport_time(infos[i]);
-					System.out.println("世界时 " + infos[i].substring(0, 2) + "日" + infos[i].substring(2, 4) + "时"
-							+ infos[i].substring(4, 6) + "分预报，");
+					m.setReport_time(TimeParser.getBJT(infos[i]));
+//					System.out.println("观测时间: " + TimeParser.getBJT(infos[i]) + "(BJT)");
+					result += "观测时间: " + TimeParser.getBJT(infos[i]) + "(BJT)" + "\r\n";
 					continue;
 				}
-				// 风第一节
+				/*
+				 * 第4组 预报的风
+				 */
+				// 风第一节 eg.VRB09G15MPS
 				if (infos[i].endsWith("MPS") || infos[i].endsWith("KT") || infos[i].endsWith("KMH")) {
 					if (infos[i].startsWith("VRB")) {
 						w.setVRB(true);
@@ -75,18 +100,55 @@ public class MyMetarParser {
 						w.setMax_gustwind_direction(Regex.parseString(infos[i + 1].substring(4, 7)));
 					}
 					m.setWind(w);
-					System.out.println(w);
+					result += "地面风:" + w + "\r\n";
+//					System.out.println("地面风:" + w);
 					continue;
 				}
-				//  能见度 四个数字 [带方向???]国内暂时按4个数字处理
-				if (Regex.isFourNumber(infos[i])) {
+				/*
+				 * 第5组 能见度
+				 */
+				// 能见度 四个数字 [带方向???]国内暂时按4个数字处理
+				if (Regex.isFourNumber(infos[i]) && i != pos) {
+					int visibility = Regex.parseString(infos[i]);
 					m.setVisibility(Regex.parseString(infos[i]));
-					System.out.println("能见度" + Regex.parseString(infos[i]) + "米");
-					//9999表示能见度大于10000米
+//					System.out.println("能见度:" + Regex.parseString(infos[i]) + "m");
+					// 9999表示能见度大于10000米
+					result += "能见度:" + (visibility == 9999 ? ">10k" : Regex.parseString(infos[i]) + "") + "m" + "\r\n";
 					continue;
 				}
-				//  天气现象 
-				if (Regex.isWeatherPhenomena(infos[i]) && i > 1 && !infos[i].startsWith("RE")) {
+
+				/*
+				 * 第6组 跑道视程
+				 */
+				// 跑道视程 RVR
+				if (Regex.isRVR(infos[i])) {
+					RunawayVisualRange rvr = new RunawayVisualRange();
+					if (infos[i].contains("V")) {
+						rvr.setContainsV(true);
+					}
+					rvr.setRunaway_number(infos[i].substring(1, 3));
+					rvr.setViusal_range(
+							Regex.parseString(infos[i].substring(infos[i].indexOf("/") + 1, infos[i].length() - 1)));
+					// 第四位是字母 跑道方向，是数字 没方向
+					if (Character.isLetter(infos[i].charAt(3))) {
+						rvr.setRunaway_LCR(String.valueOf(infos[i].charAt(3)));
+					}
+					if (Character.isLetter(infos[i].charAt(infos[i].length() - 1))) {
+						rvr.setRunaway_LCR("");
+						rvr.setRunaway_change(String.valueOf(infos[i].charAt(infos[i].length() - 1)));
+					}
+//					System.out.println(rvr);
+					result += rvr + "\r\n";
+
+					continue;
+
+				}
+				/*
+				 * 第7组 天气现象
+				 */
+				// 天气现象
+				if (Regex.isWeatherPhenomena(infos[i]) && !infos[i].startsWith("TEMPO") && !infos[i].startsWith("BECMG")
+						&& !infos[i].startsWith("NOSIG") && i > 1) {
 					WeatherPhenomena phenomena = new WeatherPhenomena();
 					// VC开头的情况
 					if (infos[i].startsWith("VC")) {
@@ -120,32 +182,15 @@ public class MyMetarParser {
 					}
 					phenomenas.add(phenomena);
 					m.setPhenomena(phenomenas);
-					System.out.println(phenomena);
+					result += "天气:"+phenomena + "\r\n";
+
+//					System.out.println(phenomena);
 					continue;
 
 				}
-				// 跑道视程 RVR
-				if (Regex.isRVR(infos[i])) {
-					RunawayVisualRange rvr = new RunawayVisualRange();
-					if (infos[i].contains("V")) {
-						rvr.setContainsV(true);
-					}
-					rvr.setRunaway_number(infos[i].substring(1, 3));
-					rvr.setViusal_range(
-							Regex.parseString(infos[i].substring(infos[i].indexOf("/") + 1, infos[i].length() - 1)));
-					// 第四位是字母 跑道方向，是数字 没方向
-					if (Character.isLetter(infos[i].charAt(3))) {
-						rvr.setRunaway_LCR(String.valueOf(infos[i].charAt(3)));
-					}
-					if (Character.isLetter(infos[i].charAt(infos[i].length() - 1))) {
-						rvr.setRunaway_LCR("");
-						rvr.setRunaway_change(String.valueOf(infos[i].charAt(infos[i].length() - 1)));
-					}
-					System.out.println(rvr);
-					continue;
-
-				}
-
+				/*
+				 * 第8组 云组
+				 */
 				// 云量
 				if (infos[i].startsWith("FEW") || infos[i].startsWith("BKN") || infos[i].startsWith("SCT")
 						|| infos[i].startsWith("OVC")) {
@@ -159,11 +204,16 @@ public class MyMetarParser {
 					}
 					c.setCloud_height(Integer.parseInt(infos[i].substring(3, 6)) * 100);
 					cloud_group.add(c);
-					System.out.println(c);
+//					System.out.println(c);
 					m.setCloud_group(cloud_group);
+					result += "云:"+c + "\r\n";
+
 					continue;
 
 				}
+				/*
+				 * 第9组 CAVOK
+				 */
 				// 云能见度等另一种 简写
 				if (infos[i].equals("CAVOK") || infos[i].equals("SKC") || infos[i].equals("NSC")) {
 					Cloud c = new Cloud();
@@ -180,12 +230,16 @@ public class MyMetarParser {
 						break;
 					}
 					cloud_group.add(c);
-					System.out.println(c);
+//					System.out.println(c);
 					m.setCloud_group(cloud_group);
+					result += c + "\r\n";
+
 					continue;
 
 				}
-
+				/*
+				 * 第10组 温度/露点
+				 */
 				// 正则温度
 				if (Regex.isTemperature(infos[i])) {
 					m.setAir_temperature(infos[i].split("/")[0].contains("M")
@@ -194,46 +248,81 @@ public class MyMetarParser {
 					m.setDewpoint_temperature(infos[i].split("/")[1].contains("M")
 							? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
 							: Regex.parseString(infos[i].split("/")[1]));
-					System.out.println("气温" + (infos[i].split("/")[0].contains("M")
+//					System.out.println("温度：" + (infos[i].split("/")[0].contains("M")
+//							? Regex.parseString(infos[i].split("/")[0].replace("M", "-"))
+//							: Regex.parseString(infos[i].split("/")[0]) + "℃,"));
+//					System.out.println("露点温度：" + (infos[i].split("/")[1].contains("M")
+//							? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
+//							: Regex.parseString(infos[i].split("/")[1]) + "℃,"));
+					result += "温度：" + (infos[i].split("/")[0].contains("M")
 							? Regex.parseString(infos[i].split("/")[0].replace("M", "-"))
-							: Regex.parseString(infos[i].split("/")[0]) + "℃,"));
-					System.out.println("露点温度" + (infos[i].split("/")[1].contains("M")
+							: Regex.parseString(infos[i].split("/")[0]) + "℃") + "\r\n";
+					result += "露点温度：" + (infos[i].split("/")[0].contains("M")
 							? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
-							: Regex.parseString(infos[i].split("/")[1]) + "℃,"));
+							: Regex.parseString(infos[i].split("/")[1]) + "℃") + "\r\n";
 					continue;
 
 				}
+				/*
+				 * 第11组 气压
+				 */
 				// TODO 北美A英寸汞柱
 				if (infos[i].startsWith("Q")) {
 					m.setPressure(Regex.parseString(infos[i].substring(1)));
-					System.out.println("修正海平面气压" + Regex.parseString(infos[i].substring(1)) + "百帕");
-					flag = true;
+//					System.out.println("修正海压：" + Regex.parseString(infos[i].substring(1)) + "hPa");
+					result += "修正海压：" + Regex.parseString(infos[i].substring(1)) + "hPa" + "\r\n";
+
 					continue;
 
 				}
+				/*
+				 * 第12组 补充 近时天气
+				 */
+
+				/*
+				 * 第13组 风切变
+				 */
+
+				/*
+				 * 第14组 趋势
+				 */
+
 				// TODO 趋势预测 气压后面的 趋势预报暂时都break
-				if (flag) {
+				if (infos[i].equals("NOSIG") || infos[i].equals("TEMPO") || infos[i].equals("BECMG")) {
+					pos = i + 1;
+//					System.out.println(Phenomena.getDescriptionByCode(infos[i]) + "\r\n");
 					// NOSIG 无明显变化
 					// TEMPO temperorary短时
 					// BECMG becoming 逐渐转变
-					break;
+					result += Phenomena.getDescriptionByCode(infos[i]) + "\r\n";
+					if (!infos[i].equals("NOSIG")) {
+						result += "从" + infos[i + 1].substring(0, 2) + "时至" + infos[i + 1].substring(2, 4) + "时\r\n";
+					}
+					continue;
+					// break;
 				}
-				// TODO WS风切变
-				// TODO RE近期天气
+				/*
+				 * 第15组 变化时间
+				 */
 
+				/*
+				 * 第16组 变化的气象要素
+				 */
 			}
+			System.out.println(result);
+			result += m.getWind_shear();
+			m.setTxtDecode(result);
+
 		}
 
 		return m;
 
 	}
 
-
 	public static void main(String[] args) {
-		MyMetarParser parser = new MyMetarParser();
+		MetarDecode parser = new MetarDecode();
 		try {
-			parser.parseMetar("METAR ZUBJ 282100Z 28002MPS 1100 R26/1000D BR SCT026 18/18 Q1010 NOSIG=\r\n" + 
-					"");
+			parser.parseMetar("METAR ZLLL 030200Z 33002MPS 4000 -RA BR OVC043 15/14 Q1012 NOSIG=");
 		} catch (MetarParseException e) {
 			e.printStackTrace();
 		}

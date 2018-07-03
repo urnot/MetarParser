@@ -7,8 +7,9 @@ package com.weather.metar.weatherenum;
  *
  */
 public enum CloudAmount {
-	FEW("FEW", "一至两分云"), SCT("SCT", "三至四分云"), BKN("BKN", "五至七分云"), OVC("OVC", "八分云"), CAVOK("CAVOK",
-			"天气及能见度良好"), SKC("SKC", "无云"), NSC("NSC", "5000英尺以上无云"), TCU("TCU", "浓积云"), CB("CB", "积雨云");
+	FEW("FEW", "少云"), SCT("SCT", "疏云"), BKN("BKN", "多云"), OVC("OVC", "满天云"), CAVOK("CAVOK",
+			"天气状况良好:能见度≥10km，\r\n" + 
+			"云高≥1500m"), SKC("SKC", "无云"), NSC("NSC", "5000英尺以下无云"), TCU("TCU", "浓积云"), CB("CB", "积雨云");
 	private String cloud_amount;
 	private String description;
 

@@ -23,6 +23,7 @@ public class Taf {
 	private String type;
 	List<WeatherPhenomena> phenomenas;
 	private List<TafChange> change;
+	private String wind_shear;
 	public String getAirport_code() {
 		return airport_code;
 	}
@@ -113,6 +114,13 @@ public class Taf {
 	public void setPhenomenas(List<WeatherPhenomena> phenomenas) {
 		this.phenomenas = phenomenas;
 	}
+	public String getWind_shear() {
+		return wind_shear;
+	}
+	public void setWind_shear(String wind_shear) {
+		this.wind_shear = wind_shear;
+	}
+	
 	
 
 }
