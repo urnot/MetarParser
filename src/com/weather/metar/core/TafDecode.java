@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.weather.metar.compoment.Cloud;
-import com.weather.metar.compoment.TafChange;
 import com.weather.metar.compoment.WeatherPhenomena;
 import com.weather.metar.compoment.Wind;
 import com.weather.metar.domain.Taf;
@@ -37,7 +36,6 @@ public class TafDecode {
 			Wind w = new Wind();
 			List<WeatherPhenomena> phenomenas = new ArrayList<>();
 			boolean flag = false;
-			List<TafChange> changes;
 
 			for (int i = 0; i < infos.length; i++) {
 				// System.out.println("parsing----"+infos[i]+"-----");
@@ -272,14 +270,14 @@ public class TafDecode {
 					// BECMG becoming 逐渐转变
 					result += Phenomena.getDescriptionByCode(infos[i]) + "\r\n";
 					if (!infos[i].equals("NOSIG")) {
-						result += "从" + infos[i + 1].substring(0, 2) + "时至" + infos[i + 1].substring(2, 4) + "时\r\n";
+						result += "从世界时" + infos[i + 1].substring(0, 2) + "时至" + infos[i + 1].substring(2, 4) + "时\r\n";
 					}
 					continue;
 					// break;
 				}
 
 			}
-			System.out.println(result);
+			System.out.println(report+"\r\n"+result);
 			result += t.getWind_shear();
 			// t.setTxtDecode(result);
 		}

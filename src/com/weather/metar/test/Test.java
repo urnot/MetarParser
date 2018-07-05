@@ -14,13 +14,13 @@ public class Test {
 		// TODO 含AUTO会有//缺测数据
 		MetarDecode md = new MetarDecode();
 		try {
-			System.out.println(md.parseMetar("METAR ZLXY 030600Z 06004MPS 3500 BR FEW005 SCT015 OVC050 21/19 Q1002 NOSIG="));
+			System.out.println(md.parseMetar("METAR ZSSS 050230Z 13004MPS 100V170 9999 BKN013 OVC040 28/26 Q0999 BECMG TL0330 BKN015="));
 		} catch (MetarParseException e) {
 			e.printStackTrace();
 		}
 		TafDecode td = new TafDecode();
 		try {
-			td.parseTaf("TAF ZLXY 030424Z 030615 06003MPS 3000 BR FEW004 SCT015 OVC050 TX25/08Z TN23/15Z BECMG 1112 2000 -RA BR=");
+			td.parseTaf("TAF ZSYN 050105Z 050312 09005MPS 2500 -SHRA BR SCT004 BKN008 TX28/06Z TN23/12Z TEMPO 0408 1200 TSRA BR BKN004 BKN008 FEW030CB=");
 		} catch (MetarParseException e) {
 			e.printStackTrace();
 		}

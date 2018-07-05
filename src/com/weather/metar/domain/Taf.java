@@ -3,7 +3,6 @@ package com.weather.metar.domain;
 import java.util.List;
 
 import com.weather.metar.compoment.Cloud;
-import com.weather.metar.compoment.TafChange;
 import com.weather.metar.compoment.WeatherPhenomena;
 import com.weather.metar.compoment.Wind;
 
@@ -22,7 +21,6 @@ public class Taf {
 	private String min__temp_time;
 	private String type;
 	List<WeatherPhenomena> phenomenas;
-	private List<TafChange> change;
 	private String wind_shear;
 	public String getAirport_code() {
 		return airport_code;
@@ -96,12 +94,7 @@ public class Taf {
 	public void setType(String type) {
 		this.type = type;
 	}
-	public List<TafChange> getChange() {
-		return change;
-	}
-	public void setChange(List<TafChange> change) {
-		this.change = change;
-	}
+
 	public int getVisibility() {
 		return visibility;
 	}

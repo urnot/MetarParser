@@ -164,6 +164,4 @@ public class Metar {
 		this.txtDecode = txtDecode;
 	}
 
-	
-
 }

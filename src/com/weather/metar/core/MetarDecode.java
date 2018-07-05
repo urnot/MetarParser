@@ -1,10 +1,7 @@
 package com.weather.metar.core;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.weather.metar.compoment.Cloud;
 import com.weather.metar.compoment.RunawayVisualRange;
@@ -296,7 +293,11 @@ public class MetarDecode {
 					// BECMG becoming 逐渐转变
 					result += Phenomena.getDescriptionByCode(infos[i]) + "\r\n";
 					if (!infos[i].equals("NOSIG")) {
-						result += "从" + infos[i + 1].substring(0, 2) + "时至" + infos[i + 1].substring(2, 4) + "时\r\n";
+						if(Character.isLetter(infos[i].charAt(0))) {
+							result+=Phenomena.getDescriptionByCode(infos[i + 1].substring(0, 2))+infos[i + 1].substring(2, 4) + ":" + infos[i + 1].substring(4, 6) + "\r\n";
+						}else {
+							result += "从" + infos[i + 1].substring(0, 2) + ":" + infos[i + 1].substring(2, 4) + "\r\n";
+						}
 					}
 					continue;
 					// break;
