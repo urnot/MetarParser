@@ -41,9 +41,9 @@ public class MetarDecode {
 				 */
 				// 例行天气预报实况，特殊天气报告
 				if (Regex.isMETAR(infos[i])) {
-//					System.out.println("格式：" + infos[i]);
+					// System.out.println("格式：" + infos[i]);
 					m.setReport_time(infos[i]);
-					result +="类型：" +infos[i] + "\r\n";
+					result += "类型：" + infos[i] + "\r\n";
 					continue;
 				}
 				/*
@@ -52,7 +52,7 @@ public class MetarDecode {
 				// CHINA only
 				if (Regex.isChinaICAO(infos[i])) {
 					m.setAirport_code(infos[i]);
-//					System.out.println("机场:" + infos[i] + ",");
+					// System.out.println("机场:" + infos[i] + ",");
 					result += "机场:" + infos[i] + "\r\n";
 					continue;
 
@@ -62,7 +62,7 @@ public class MetarDecode {
 				 */
 				if (Regex.isTimeZ(infos[i]) && infos[i].length() == 7) {
 					m.setReport_time(TimeParser.getBJT(infos[i]));
-//					System.out.println("观测时间: " + TimeParser.getBJT(infos[i]) + "(BJT)");
+					// System.out.println("观测时间: " + TimeParser.getBJT(infos[i]) + "(BJT)");
 					result += "观测时间: " + TimeParser.getBJT(infos[i]) + "(BJT)" + "\r\n";
 					continue;
 				}
@@ -98,7 +98,7 @@ public class MetarDecode {
 					}
 					m.setWind(w);
 					result += "地面风:" + w + "\r\n";
-//					System.out.println("地面风:" + w);
+					// System.out.println("地面风:" + w);
 					continue;
 				}
 				/*
@@ -108,7 +108,7 @@ public class MetarDecode {
 				if (Regex.isFourNumber(infos[i]) && i != pos) {
 					int visibility = Regex.parseString(infos[i]);
 					m.setVisibility(Regex.parseString(infos[i]));
-//					System.out.println("能见度:" + Regex.parseString(infos[i]) + "m");
+					// System.out.println("能见度:" + Regex.parseString(infos[i]) + "m");
 					// 9999表示能见度大于10000米
 					result += "能见度:" + (visibility == 9999 ? ">10k" : Regex.parseString(infos[i]) + "") + "m" + "\r\n";
 					continue;
@@ -120,21 +120,40 @@ public class MetarDecode {
 				// 跑道视程 RVR
 				if (Regex.isRVR(infos[i])) {
 					RunawayVisualRange rvr = new RunawayVisualRange();
+					rvr.setRunaway_number(infos[i].substring(1, 3));
 					if (infos[i].contains("V")) {
 						rvr.setContainsV(true);
+						rvr.setMin_range(Regex
+								.parseString(infos[i].substring(infos[i].indexOf("/")+1, infos[i].indexOf("V"))));
+						rvr.setMax_range(Regex
+								.parseString(infos[i].substring(infos[i].indexOf("V")+1, infos[i].indexOf("V")+5)));
+					}else {
+						
+						// R30/P2000N   R07/0200V1200
+						if (Character.isLetter(infos[i].charAt(3))) {
+							rvr.setRunaway_LCR(String.valueOf(infos[i].charAt(3)));
+							rvr.setViusal_range(Regex
+									.parseString(infos[i].substring(infos[i].indexOf("/") + 2, infos[i].length() - 1)));
+						}
+						if (Character.isLetter(infos[i].charAt(infos[i].length() - 1))) {
+							// 第5位
+							if (Character.isLetter(infos[i].charAt(4))) {
+								rvr.setRunaway_LCR("");
+								rvr.setViusal_range(Regex
+										.parseString(infos[i].substring(infos[i].indexOf("/") + 2, infos[i].length() - 1)));
+								rvr.setRunaway_change(String.valueOf(infos[i].charAt(infos[i].length() - 1)));
+							} else {
+								rvr.setRunaway_LCR("");
+								rvr.setViusal_range(Regex
+										.parseString(infos[i].substring(infos[i].indexOf("/") + 1, infos[i].length() - 1)));
+								rvr.setRunaway_change(String.valueOf(infos[i].charAt(infos[i].length() - 1)));
+							}
+						}else {
+							rvr.setViusal_range(Regex
+									.parseString(infos[i].substring(infos[i].indexOf("/") + 1, infos[i].length() - 1)));
+						}
 					}
-					rvr.setRunaway_number(infos[i].substring(1, 3));
-					rvr.setViusal_range(
-							Regex.parseString(infos[i].substring(infos[i].indexOf("/") + 1, infos[i].length() - 1)));
-					// 第四位是字母 跑道方向，是数字 没方向
-					if (Character.isLetter(infos[i].charAt(3))) {
-						rvr.setRunaway_LCR(String.valueOf(infos[i].charAt(3)));
-					}
-					if (Character.isLetter(infos[i].charAt(infos[i].length() - 1))) {
-						rvr.setRunaway_LCR("");
-						rvr.setRunaway_change(String.valueOf(infos[i].charAt(infos[i].length() - 1)));
-					}
-//					System.out.println(rvr);
+					// System.out.println(rvr);
 					result += rvr + "\r\n";
 
 					continue;
@@ -145,7 +164,7 @@ public class MetarDecode {
 				 */
 				// 天气现象
 				if (Regex.isWeatherPhenomena(infos[i]) && !infos[i].startsWith("TEMPO") && !infos[i].startsWith("BECMG")
-						&& !infos[i].startsWith("NOSIG") && i > 1) {
+						&& !infos[i].startsWith("NOSIG") && !infos[i].startsWith("AUTO") && i > 1) {
 					WeatherPhenomena phenomena = new WeatherPhenomena();
 					// VC开头的情况
 					if (infos[i].startsWith("VC")) {
@@ -179,9 +198,9 @@ public class MetarDecode {
 					}
 					phenomenas.add(phenomena);
 					m.setPhenomena(phenomenas);
-					result += "天气:"+phenomena + "\r\n";
+					result += "天气:" + phenomena + "\r\n";
 
-//					System.out.println(phenomena);
+					// System.out.println(phenomena);
 					continue;
 
 				}
@@ -201,9 +220,9 @@ public class MetarDecode {
 					}
 					c.setCloud_height(Integer.parseInt(infos[i].substring(3, 6)) * 100);
 					cloud_group.add(c);
-//					System.out.println(c);
+					// System.out.println(c);
 					m.setCloud_group(cloud_group);
-					result += "云:"+c + "\r\n";
+					result += "云:" + c + "\r\n";
 
 					continue;
 
@@ -227,7 +246,7 @@ public class MetarDecode {
 						break;
 					}
 					cloud_group.add(c);
-//					System.out.println(c);
+					// System.out.println(c);
 					m.setCloud_group(cloud_group);
 					result += c + "\r\n";
 
@@ -245,16 +264,16 @@ public class MetarDecode {
 					m.setDewpoint_temperature(infos[i].split("/")[1].contains("M")
 							? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
 							: Regex.parseString(infos[i].split("/")[1]));
-//					System.out.println("温度：" + (infos[i].split("/")[0].contains("M")
-//							? Regex.parseString(infos[i].split("/")[0].replace("M", "-"))
-//							: Regex.parseString(infos[i].split("/")[0]) + "℃,"));
-//					System.out.println("露点温度：" + (infos[i].split("/")[1].contains("M")
-//							? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
-//							: Regex.parseString(infos[i].split("/")[1]) + "℃,"));
+					// System.out.println("温度：" + (infos[i].split("/")[0].contains("M")
+					// ? Regex.parseString(infos[i].split("/")[0].replace("M", "-"))
+					// : Regex.parseString(infos[i].split("/")[0]) + "℃,"));
+					// System.out.println("露点温度：" + (infos[i].split("/")[1].contains("M")
+					// ? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
+					// : Regex.parseString(infos[i].split("/")[1]) + "℃,"));
 					result += "温度：" + (infos[i].split("/")[0].contains("M")
 							? Regex.parseString(infos[i].split("/")[0].replace("M", "-"))
 							: Regex.parseString(infos[i].split("/")[0]) + "℃") + "\r\n";
-					result += "露点温度：" + (infos[i].split("/")[0].contains("M")
+					result += "露点温度：" + (infos[i].split("/")[1].contains("M")
 							? Regex.parseString(infos[i].split("/")[1].replace("M", "-"))
 							: Regex.parseString(infos[i].split("/")[1]) + "℃") + "\r\n";
 					continue;
@@ -266,7 +285,8 @@ public class MetarDecode {
 				// TODO 北美A英寸汞柱
 				if (infos[i].startsWith("Q")) {
 					m.setPressure(Regex.parseString(infos[i].substring(1)));
-//					System.out.println("修正海压：" + Regex.parseString(infos[i].substring(1)) + "hPa");
+					// System.out.println("修正海压：" + Regex.parseString(infos[i].substring(1)) +
+					// "hPa");
 					result += "修正海压：" + Regex.parseString(infos[i].substring(1)) + "hPa" + "\r\n";
 
 					continue;
@@ -287,15 +307,16 @@ public class MetarDecode {
 				// TODO 趋势预测 气压后面的 趋势预报暂时都break
 				if (infos[i].equals("NOSIG") || infos[i].equals("TEMPO") || infos[i].equals("BECMG")) {
 					pos = i + 1;
-//					System.out.println(Phenomena.getDescriptionByCode(infos[i]) + "\r\n");
+					// System.out.println(Phenomena.getDescriptionByCode(infos[i]) + "\r\n");
 					// NOSIG 无明显变化
 					// TEMPO temperorary短时
 					// BECMG becoming 逐渐转变
 					result += Phenomena.getDescriptionByCode(infos[i]) + "\r\n";
 					if (!infos[i].equals("NOSIG")) {
-						if(Character.isLetter(infos[i].charAt(0))) {
-							result+=Phenomena.getDescriptionByCode(infos[i + 1].substring(0, 2))+infos[i + 1].substring(2, 4) + ":" + infos[i + 1].substring(4, 6) + "\r\n";
-						}else {
+						if (Character.isLetter(infos[i].charAt(0))) {
+							result += Phenomena.getDescriptionByCode(infos[i + 1].substring(0, 2))
+									+ infos[i + 1].substring(2, 4) + ":" + infos[i + 1].substring(4, 6) + "\r\n";
+						} else {
 							result += "从" + infos[i + 1].substring(0, 2) + ":" + infos[i + 1].substring(2, 4) + "\r\n";
 						}
 					}

@@ -14,7 +14,7 @@ public class RunawayVisualRange {
 	// 是否有V字符
 	private boolean containsV;
 	// 最小
-	private String min_range;
+	private int min_range;
 	// 最小值的变化
 	private String min_range_change;
 	// 最大
@@ -62,12 +62,12 @@ public class RunawayVisualRange {
 		this.runaway_change = runaway_change;
 	}
 
-	public String getMin_range() {
+	public int getMin_range() {
 		return min_range;
 	}
 
-	public void setMin_range(String min_range) {
-		this.min_range = min_range;
+	public void setMin_range(int i) {
+		this.min_range = i;
 	}
 
 	public String getMin_range_change() {
@@ -112,7 +112,7 @@ public class RunawayVisualRange {
 			if (this.max_range_change != null) {
 				max_change += Unit.getDescriptionByCode(max_range_change);
 			}
-			return this.runaway_number + Unit.getDescriptionByCode(runaway_LCR) + "跑道，最小跑道视程" + this.min_range + "米,"
+			return this.runaway_number + runaway_LCR==null?Unit.getDescriptionByCode(runaway_LCR):"" + "跑道，最小跑道视程" + this.min_range + "米,"
 					+ min_change + ",最大跑道视程" + this.max_range + "米," + max_change + ",";
 
 		} else {

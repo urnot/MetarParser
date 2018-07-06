@@ -228,14 +228,14 @@ public class TafDecode {
 						t.setMax_temp(infos[i].substring(2, 4));
 						t.setMax__temp_time(infos[i].substring(5, 7));
 						result+="最高温度： " + infos[i].substring(2, 4) + "℃，最高温度时间:"
-								+ Regex.parseString(infos[i].substring(5, 7)) + "时\r\n";
+								+ Regex.parseString(infos[i].substring(5, 7)) + "时(UTC)\r\n";
 //						System.out.println("最高温度： " + infos[i].substring(2, 4) + "℃，最高温度时间:"
 //								+ Regex.parseString(infos[i].substring(5, 7)) + "时");
 					} else {
 						t.setMin_temp(infos[i].substring(2, 4));
 						t.setMin__temp_time(infos[i].substring(5, 7));
 						result+="最低温度： " + infos[i].substring(2, 4) + "℃，最低温度时间 :"
-								+ Regex.parseString(infos[i].substring(5, 7)) + "时\r\n";
+								+ Regex.parseString(infos[i].substring(5, 7)) + "时(UTC)\r\n";
 //						System.out.println("最低温度： " + infos[i].substring(2, 4) + "℃，最低温度时间 :"
 //								+ Regex.parseString(infos[i].substring(5, 7)) + "时");
 					}
