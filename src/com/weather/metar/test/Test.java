@@ -3,6 +3,8 @@ package com.weather.metar.test;
 
 import com.weather.metar.core.MetarDecode;
 import com.weather.metar.core.TafDecode;
+import com.weather.metar.domain.Metar;
+import com.weather.metar.domain.Taf;
 import com.weather.metar.exception.MetarParseException;
 
 public class Test {
@@ -13,15 +15,21 @@ public class Test {
 		//todoVRB02G17MPS
 		// TODO 含AUTO会有//缺测数据
 		MetarDecode md = new MetarDecode();
+		Metar m = new Metar();
 		try {
-			System.out.println(md.parseMetar("METAR ZLHZ 052200Z AUTO 06002MPS 0750 R07/0200V1200 // ////// 25/24 Q1004= "));
-		} catch (MetarParseException e) {
+			m=md.parseMetar("METAR ZSSH 092200Z 05001MPS 0400 R04/0500D FG VV003 24/24 Q1008 NOSIG=");
+			System.out.println(m.getCloud_group());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		Taf t  = new Taf();
 		TafDecode td = new TafDecode();
 		try {
-			td.parseTaf("TAF ZSAM 052205Z 060009 20004G09MPS 8000 SCT030 TX34/06Z TN29/00Z TEMPO 0509 FEW026CB SCT026=");
-		} catch (MetarParseException e) {
+			t=td.parseTaf("TAF ZBYC 100747Z 100918 12004MPS 6000 -SHRA NSC TX24/09Z TN17/18Z= ");
+			System.out.println(t.getTxtDecode());
+			System.out.println(t.getReport_time());
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		

@@ -16,7 +16,7 @@ import com.weather.metar.weatherenum.Phenomena;
 
 public class TafDecode {
 
-	public void parseTaf(String report) throws MetarParseException {
+	public Taf parseTaf(String report) throws MetarParseException {
 		Taf t = new Taf();
 		String result = "";
 		int pos = 0;// 记录游标，天气现象变化之后的四位数字 非能见度
@@ -38,7 +38,6 @@ public class TafDecode {
 			boolean flag = false;
 
 			for (int i = 0; i < infos.length; i++) {
-				// System.out.println("parsing----"+infos[i]+"-----");
 				/*
 				 * 第一组 电报名称
 				 */
@@ -52,7 +51,6 @@ public class TafDecode {
 				 */
 				if (Regex.isChinaICAO(infos[i])) {
 					t.setAirport_code(infos[i]);
-					// System.out.println("ICAO:" + infos[i]);
 					result += "机场:" + infos[i] + "\r\n";
 					continue;
 				}
@@ -133,7 +131,7 @@ public class TafDecode {
 				 */
 				// 天气现象
 				if (Regex.isWeatherPhenomena(infos[i]) && !infos[i].startsWith("TEMPO") && !infos[i].startsWith("BECMG")
-						&& i > 1) {
+						&& !infos[i].startsWith("NOSIG") && !infos[i].startsWith("AUTO") && i > 1) {
 					WeatherPhenomena phenomena = new WeatherPhenomena();
 					// VC开头的情况
 					if (infos[i].startsWith("VC")) {
@@ -188,7 +186,7 @@ public class TafDecode {
 					c.setCloud_height(Integer.parseInt(infos[i].substring(3, 6)) * 100);
 					cloud_group.add(c);
 					// System.out.println(c);
-					t.setColud(cloud_group);
+					t.setCloud(cloud_group);
 					result += "云:" + c + "\r\n";
 
 					continue;
@@ -215,7 +213,7 @@ public class TafDecode {
 					cloud_group.add(c);
 					// System.out.println(c);
 					result += c + "\r\n";
-					t.setColud(cloud_group);
+					t.setCloud(cloud_group);
 					continue;
 
 				}
@@ -227,17 +225,17 @@ public class TafDecode {
 					if (infos[i].charAt(1) == 'X') {
 						t.setMax_temp(infos[i].substring(2, 4));
 						t.setMax__temp_time(infos[i].substring(5, 7));
-						result+="最高温度： " + infos[i].substring(2, 4) + "℃，最高温度时间:"
+						result += "最高温度： " + infos[i].substring(2, 4) + "℃，最高温度时间:"
 								+ Regex.parseString(infos[i].substring(5, 7)) + "时(UTC)\r\n";
-//						System.out.println("最高温度： " + infos[i].substring(2, 4) + "℃，最高温度时间:"
-//								+ Regex.parseString(infos[i].substring(5, 7)) + "时");
+						// System.out.println("最高温度： " + infos[i].substring(2, 4) + "℃，最高温度时间:"
+						// + Regex.parseString(infos[i].substring(5, 7)) + "时");
 					} else {
 						t.setMin_temp(infos[i].substring(2, 4));
 						t.setMin__temp_time(infos[i].substring(5, 7));
-						result+="最低温度： " + infos[i].substring(2, 4) + "℃，最低温度时间 :"
+						result += "最低温度： " + infos[i].substring(2, 4) + "℃，最低温度时间 :"
 								+ Regex.parseString(infos[i].substring(5, 7)) + "时(UTC)\r\n";
-//						System.out.println("最低温度： " + infos[i].substring(2, 4) + "℃，最低温度时间 :"
-//								+ Regex.parseString(infos[i].substring(5, 7)) + "时");
+						// System.out.println("最低温度： " + infos[i].substring(2, 4) + "℃，最低温度时间 :"
+						// + Regex.parseString(infos[i].substring(5, 7)) + "时");
 					}
 					continue;
 				}
@@ -277,11 +275,13 @@ public class TafDecode {
 				}
 
 			}
-			System.out.println(report+"\r\n"+result);
-			result += t.getWind_shear();
-			// t.setTxtDecode(result);
+//			System.out.println(report + "\r\n" + result);
+			if(t.getWind_shear()!=null) {
+				result += t.getWind_shear();
+			}
+			t.setTxtDecode(result);
 		}
-
+		return t;
 	}
 
 	public static void main(String[] args) {

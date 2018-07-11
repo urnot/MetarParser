@@ -154,6 +154,10 @@ public class Metar {
 	public void setTxtDecode(String txtDecode) {
 		this.txtDecode = txtDecode;
 	}
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 
 
 

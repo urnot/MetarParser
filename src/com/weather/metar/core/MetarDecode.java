@@ -117,9 +117,9 @@ public class MetarDecode {
 				/*
 				 * 第6组 跑道视程
 				 */
-				// 跑道视程 RVR
+				// 跑道视程 RVR 暂时注释
 				if (Regex.isRVR(infos[i])) {
-					RunawayVisualRange rvr = new RunawayVisualRange();
+/*					RunawayVisualRange rvr = new RunawayVisualRange();
 					rvr.setRunaway_number(infos[i].substring(1, 3));
 					if (infos[i].contains("V")) {
 						rvr.setContainsV(true);
@@ -153,9 +153,8 @@ public class MetarDecode {
 									.parseString(infos[i].substring(infos[i].indexOf("/") + 1, infos[i].length() - 1)));
 						}
 					}
-					// System.out.println(rvr);
 					result += rvr + "\r\n";
-
+*/
 					continue;
 
 				}
@@ -199,10 +198,8 @@ public class MetarDecode {
 					phenomenas.add(phenomena);
 					m.setPhenomena(phenomenas);
 					result += "天气:" + phenomena + "\r\n";
-
 					// System.out.println(phenomena);
 					continue;
-
 				}
 				/*
 				 * 第8组 云组
@@ -313,7 +310,7 @@ public class MetarDecode {
 					// BECMG becoming 逐渐转变
 					result += Phenomena.getDescriptionByCode(infos[i]) + "\r\n";
 					if (!infos[i].equals("NOSIG")) {
-						if (Character.isLetter(infos[i].charAt(0))) {
+						if (Character.isDigit(infos[i].charAt(0))) {
 							result += Phenomena.getDescriptionByCode(infos[i + 1].substring(0, 2))
 									+ infos[i + 1].substring(2, 4) + ":" + infos[i + 1].substring(4, 6) + "\r\n";
 						} else {
@@ -331,8 +328,10 @@ public class MetarDecode {
 				 * 第16组 变化的气象要素
 				 */
 			}
-			System.out.println(result);
-			result += m.getWind_shear();
+//			System.out.println(result);
+			if(m.getWind_shear()!=null) {
+				result += m.getWind_shear();
+			}
 			m.setTxtDecode(result);
 
 		}
